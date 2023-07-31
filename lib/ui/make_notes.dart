@@ -1,5 +1,9 @@
+import 'package:app_note/main.dart';
 import 'package:app_note/sqlline/database_notes.dart';
+import 'package:app_note/ui/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+
 class MakeNotes extends StatefulWidget {
   const MakeNotes({super.key});
 
@@ -8,27 +12,17 @@ class MakeNotes extends StatefulWidget {
 }
 
 class _MakeNotesState extends State<MakeNotes> {
-  late  TextEditingController _controller = TextEditingController();
-  final NotesDatabase notesDatabase = NotesDatabase();
-  void insertDataToDatabase() async {
-    try {
-      await notesDatabase.insertNote({
-        'title': 'Ghi chú mới',
-        'content': 'Nội dung ghi chú',
-        'dateCreate': DateTime.now().toString(),
-        'fixDate': DateTime.now().toString(),
-      });
-    } catch (e) {
-      print('Error inserting data: $e');
-    }
-  }
+  late TextEditingController _controller = TextEditingController();
+  NotesProvider notesProvider = NotesProvider();
+  Notes notes = Notes(content: '', title: '');
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _controller=TextEditingController();
+    _controller = TextEditingController();
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -86,7 +80,92 @@ class _MakeNotesState extends State<MakeNotes> {
                     borderRadius: BorderRadius.circular(15)),
                 child: IconButton(
                   onPressed: () {
-
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          backgroundColor: const Color.fromRGBO(39, 39, 39, 1),
+                          icon: Center(
+                              child: Image.asset('assets/image/warning.png',
+                                  fit: BoxFit.cover)),
+                          title: const Text(
+                            'Save changes ?',
+                            style: TextStyle(color: Colors.white, fontSize: 23),
+                          ),
+                          actions: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  width: 110,
+                                  height: 39,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: Colors.red,
+                                  ),
+                                  child: TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text(
+                                      'Discard',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 18),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: 110,
+                                  height: 39,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: Colors.green,
+                                  ),
+                                  child: TextButton(
+                                    onPressed: () {
+                                      //      notesProvider.insert(notes);
+                                      notesProvider.insertNote(notes).then(
+                                          (value) => Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                            return const HomeScreen();
+                                          },)));
+                                    },
+                                    child: const Text(
+                                      'Save',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 18),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                            // TextButton(
+                            //   onPressed: () {},
+                            //   child: Text(
+                            //     'Discard',
+                            //     style: TextStyle(
+                            //         color: Colors.white, fontSize: 18),
+                            //   ),
+                            //   style: TextButton.styleFrom(
+                            //       backgroundColor: Colors.red,
+                            //       padding: EdgeInsets.symmetric(horizontal: 32, vertical: 8)
+                            //   ),
+                            // ),
+                            // TextButton(
+                            //   onPressed: () {},
+                            //   child: Text(
+                            //     'Save',
+                            //     style: TextStyle(
+                            //         color: Colors.white, fontSize: 18),
+                            //   ),
+                            //   style: TextButton.styleFrom(
+                            //       backgroundColor: Colors.green,
+                            //       padding: EdgeInsets.symmetric(horizontal: 32, vertical: 8)
+                            //   ),
+                            // )
+                          ],
+                        );
+                      },
+                    );
                   },
                   icon: const Icon(
                     Icons.save_outlined,
@@ -98,38 +177,28 @@ class _MakeNotesState extends State<MakeNotes> {
             ],
           ),
           const TextField(
-              autofocus: true,
+            autofocus: true,
             maxLines: null,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 48
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 48),
             decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: 'Title',
-              hintStyle: TextStyle(
-                color: Colors.white38,
-                fontSize: 48,
-
-              )
-            ),
+                border: InputBorder.none,
+                hintText: 'Title',
+                hintStyle: TextStyle(
+                  color: Colors.white38,
+                  fontSize: 48,
+                )),
           ),
           const TextField(
             autofocus: true,
             maxLines: null,
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 23
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 23),
             decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Type something...',
                 hintStyle: TextStyle(
                   color: Colors.white38,
                   fontSize: 23,
-
-                )
-            ),
+                )),
           )
         ],
       ),

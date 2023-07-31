@@ -1,3 +1,4 @@
+import 'package:app_note/sqlline/database_notes.dart';
 import 'package:app_note/ui/make_notes.dart';
 import 'package:app_note/ui/searching_note.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Future<List<Notes>> notesList = NotesProvider().getNotes();
+  //List<Notes> notesList =[];
+  bool isNotes = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+            isNotes ?
             const Column(
               children: [
                 Center(
@@ -117,6 +128,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   'Create your first note !',
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 )
+              ],
+            )
+            : Column(
+              children: [
+                ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  //itemCount:,
+                  itemBuilder: (context, index) {
+                  return Container(
+                  //  child: Text(notesList[index].title ?? '', style: TextStyle(color: Colors.white, fontSize: 25),),
+                  );
+                },)
               ],
             ),
             Container(
