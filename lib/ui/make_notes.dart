@@ -1,8 +1,8 @@
-import 'package:app_note/main.dart';
+
 import 'package:app_note/sqlline/database_notes.dart';
 import 'package:app_note/ui/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
+
 
 class MakeNotes extends StatefulWidget {
   const MakeNotes({super.key});
@@ -12,15 +12,17 @@ class MakeNotes extends StatefulWidget {
 }
 
 class _MakeNotesState extends State<MakeNotes> {
-  late TextEditingController _controller = TextEditingController();
+  late TextEditingController _controller ;
+  late TextEditingController _contentController ;
   NotesProvider notesProvider = NotesProvider();
-  Notes notes = Notes(content: '', title: '');
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _controller = TextEditingController();
+    _contentController =TextEditingController();
   }
 
   @override
@@ -28,6 +30,7 @@ class _MakeNotesState extends State<MakeNotes> {
     // TODO: implement dispose
     super.dispose();
     _controller.dispose();
+    _contentController.dispose();
   }
 
   @override
@@ -123,11 +126,15 @@ class _MakeNotesState extends State<MakeNotes> {
                                   ),
                                   child: TextButton(
                                     onPressed: () {
+                                      Notes notes = Notes(content: _contentController.text, title: _controller.text, );
                                       //      notesProvider.insert(notes);
                                       notesProvider.insertNote(notes).then(
-                                          (value) => Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                            return const HomeScreen();
-                                          },)));
+                                          (value) => Navigator.push(context,
+                                                  MaterialPageRoute(
+                                                builder: (context) {
+                                                  return const HomeScreen();
+                                                },
+                                              )));
                                     },
                                     child: const Text(
                                       'Save',
@@ -138,30 +145,6 @@ class _MakeNotesState extends State<MakeNotes> {
                                 ),
                               ],
                             )
-                            // TextButton(
-                            //   onPressed: () {},
-                            //   child: Text(
-                            //     'Discard',
-                            //     style: TextStyle(
-                            //         color: Colors.white, fontSize: 18),
-                            //   ),
-                            //   style: TextButton.styleFrom(
-                            //       backgroundColor: Colors.red,
-                            //       padding: EdgeInsets.symmetric(horizontal: 32, vertical: 8)
-                            //   ),
-                            // ),
-                            // TextButton(
-                            //   onPressed: () {},
-                            //   child: Text(
-                            //     'Save',
-                            //     style: TextStyle(
-                            //         color: Colors.white, fontSize: 18),
-                            //   ),
-                            //   style: TextButton.styleFrom(
-                            //       backgroundColor: Colors.green,
-                            //       padding: EdgeInsets.symmetric(horizontal: 32, vertical: 8)
-                            //   ),
-                            // )
                           ],
                         );
                       },
@@ -176,11 +159,12 @@ class _MakeNotesState extends State<MakeNotes> {
               ),
             ],
           ),
-          const TextField(
+        TextField(
+            controller: _controller,
             autofocus: true,
             maxLines: null,
-            style: TextStyle(color: Colors.white, fontSize: 48),
-            decoration: InputDecoration(
+            style: const TextStyle(color: Colors.white, fontSize: 48),
+            decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Title',
                 hintStyle: TextStyle(
@@ -188,11 +172,12 @@ class _MakeNotesState extends State<MakeNotes> {
                   fontSize: 48,
                 )),
           ),
-          const TextField(
+       TextField(
+         controller: _contentController,
             autofocus: true,
             maxLines: null,
-            style: TextStyle(color: Colors.white, fontSize: 23),
-            decoration: InputDecoration(
+            style: const TextStyle(color: Colors.white, fontSize: 23),
+            decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Type something...',
                 hintStyle: TextStyle(
