@@ -92,13 +92,6 @@ class _SearchingNoteState extends State<SearchingNote> {
                     ],
                   ),
                 )
-
-                // Container(
-                //   decoration: BoxDecoration(
-                //     image: DecorationImage(image: AssetImage('assets/image/cuate.png'))
-                //   ),
-                //   child: Image.asset('assets/image/cuate.png'),
-                // )
                 ),
           ],
         ),

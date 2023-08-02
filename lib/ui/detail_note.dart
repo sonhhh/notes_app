@@ -1,7 +1,11 @@
+import 'package:app_note/sqlline/database_notes.dart';
 import 'package:flutter/material.dart';
 
 class DetailNote extends StatefulWidget {
-  const DetailNote({super.key});
+
+  final int noteId;
+
+  const DetailNote({super.key, required this.noteId});
 
   @override
   State<DetailNote> createState() => _DetailNoteState();
@@ -10,6 +14,7 @@ class DetailNote extends StatefulWidget {
 class _DetailNoteState extends State<DetailNote> {
   late TextEditingController _controller;
   late TextEditingController _contentController;
+  NotesProvider notesProvider = NotesProvider();
 
   @override
   void initState() {
@@ -17,6 +22,7 @@ class _DetailNoteState extends State<DetailNote> {
     super.initState();
     _controller = TextEditingController();
     _contentController = TextEditingController();
+    initData();
   }
 
   @override
@@ -27,8 +33,15 @@ class _DetailNoteState extends State<DetailNote> {
     _contentController.dispose();
   }
 
+  Future<void> initData() async {
+    List<Notes> loading = await NotesProvider().getDetail(widget.noteId);
+      _controller.text = loading[0].title ?? '';
+      _contentController.text = loading[0].content ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Container(
           height: double.infinity,
@@ -64,7 +77,82 @@ class _DetailNoteState extends State<DetailNote> {
                         color: const Color.fromRGBO(59, 59, 59, 1),
                         borderRadius: BorderRadius.circular(15)),
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              backgroundColor:
+                                  const Color.fromRGBO(39, 39, 39, 1),
+                              icon: Center(
+                                  child: Image.asset('assets/image/warning.png',
+                                      fit: BoxFit.cover)),
+                              title: const Text(
+                                'Save changes ?',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 23),
+                              ),
+                              actions: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Container(
+                                      width: 110,
+                                      height: 39,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: Colors.red,
+                                      ),
+                                      child: TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text(
+                                          'Discard',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 110,
+                                      height: 39,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: Colors.green,
+                                      ),
+                                      child: TextButton(
+                                        onPressed: () {
+                                          Notes notes = Notes(
+                                            id: widget.noteId,
+                                            content: _contentController.text,
+                                            title: _controller.text,
+                                            fixDate: DateTime.now(),
+                                          );
+                                          notesProvider.update(notes).then((value) {
+                                            final updateTitle = notes.title;
+                                            Navigator.pop(context,
+                                                updateTitle);
+                                          }
+                                          );
+                                        },
+                                        child: const Text(
+                                          'Save',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            );
+                          },
+                        );
+                      },
                       icon: const Icon(
                         Icons.mode,
                         size: 25,
@@ -79,6 +167,9 @@ class _DetailNoteState extends State<DetailNote> {
                 autofocus: true,
                 maxLines: null,
                 style: const TextStyle(color: Colors.white, fontSize: 48),
+                onChanged: (value) {
+                  setState(() {});
+                },
                 decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Title',
@@ -92,6 +183,11 @@ class _DetailNoteState extends State<DetailNote> {
                 autofocus: true,
                 maxLines: null,
                 style: const TextStyle(color: Colors.white, fontSize: 23),
+                onChanged: (value) {
+                  setState(() {
+                    // content =value;
+                  });
+                },
                 decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Type something...',
@@ -101,10 +197,7 @@ class _DetailNoteState extends State<DetailNote> {
                     )),
               )
             ],
-          )
-          // TextField(),
-          // TextField(),
-          ),
+          )),
     );
   }
 }

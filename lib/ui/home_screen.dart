@@ -5,7 +5,8 @@ import 'package:app_note/ui/searching_note.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String? updateTitle ;
+   const HomeScreen({super.key, this.updateTitle});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,9 +15,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   NotesProvider notesProvider = NotesProvider();
   bool hasNote = false;
-  List<Notes> noteList = [];
-
-  // bool loading = true;
+  late final List<Notes> noteList;
+  late final int index;
   @override
   void initState() {
     super.initState();
@@ -30,12 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
       hasNote = noteList.isNotEmpty;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Container(
-        margin: EdgeInsets.only(right: 40, bottom: 30),
+        margin: const EdgeInsets.only(right: 40, bottom: 30),
         decoration: BoxDecoration(
             color: const Color.fromRGBO(59, 59, 59, 1),
             borderRadius: BorderRadius.circular(30)),
@@ -165,17 +164,18 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all()),
                         child: GestureDetector(
-                          onTap: () {
-                            int? selectedId = noteList[index].id;
+                          onTap: () async {
+                            int selectedId = noteList[index].id ?? 0;
+                            print(selectedId);
                             Navigator.push(
                                 context, MaterialPageRoute(builder: (context) {
-                              return const DetailNote(
-                               // noteId: selectedId,
+                              return DetailNote(
+                                noteId: selectedId
                               );
                             },));
                           },
                           child: Text(
-                            noteList[index].title ?? '',
+                            widget.updateTitle ?? noteList[index].title ?? '',
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 25),
                           ),

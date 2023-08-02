@@ -1,8 +1,6 @@
-
 import 'package:app_note/sqlline/database_notes.dart';
 import 'package:app_note/ui/home_screen.dart';
 import 'package:flutter/material.dart';
-
 
 class MakeNotes extends StatefulWidget {
   const MakeNotes({super.key});
@@ -12,17 +10,18 @@ class MakeNotes extends StatefulWidget {
 }
 
 class _MakeNotesState extends State<MakeNotes> {
-  late TextEditingController _controller ;
-  late TextEditingController _contentController ;
-  NotesProvider notesProvider = NotesProvider();
+  late TextEditingController _controller;
 
+  late TextEditingController _contentController;
+
+  NotesProvider notesProvider = NotesProvider();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _controller = TextEditingController();
-    _contentController =TextEditingController();
+    _contentController = TextEditingController();
   }
 
   @override
@@ -126,13 +125,16 @@ class _MakeNotesState extends State<MakeNotes> {
                                   ),
                                   child: TextButton(
                                     onPressed: () {
-                                      Notes notes = Notes(content: _contentController.text, title: _controller.text, );
-                                      //      notesProvider.insert(notes);
+                                      Notes notes = Notes(
+                                        content: _contentController.text,
+                                        title: _controller.text,
+                                        dateCreate: DateTime.now()
+                                      );
                                       notesProvider.insertNote(notes).then(
                                           (value) => Navigator.push(context,
                                                   MaterialPageRoute(
                                                 builder: (context) {
-                                                  return const HomeScreen();
+                                                  return HomeScreen();
                                                 },
                                               )));
                                     },
@@ -159,7 +161,7 @@ class _MakeNotesState extends State<MakeNotes> {
               ),
             ],
           ),
-        TextField(
+          TextField(
             controller: _controller,
             autofocus: true,
             maxLines: null,
@@ -172,8 +174,8 @@ class _MakeNotesState extends State<MakeNotes> {
                   fontSize: 48,
                 )),
           ),
-       TextField(
-         controller: _contentController,
+          TextField(
+            controller: _contentController,
             autofocus: true,
             maxLines: null,
             style: const TextStyle(color: Colors.white, fontSize: 23),

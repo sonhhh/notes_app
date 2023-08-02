@@ -29,8 +29,8 @@ class Notes {
     var map = <String, dynamic>{
       columnTitle: title,
       columnContent: content,
-      columnDatecreate: dateCreate,
-      columnFixdate: fixDate,
+      columnFixdate: fixDate?.toIso8601String(),
+      columnDatecreate: dateCreate?.toIso8601String(),
     };
     if (id != null) {
       map[columnId] = id;
@@ -45,8 +45,8 @@ class Notes {
           id: map[columnId],
           title: map[columnTitle],
           content: map[columnContent],
-      dateCreate: null,
-      fixDate: null));
+          dateCreate: null,
+          fixDate: null));
     }
     return notesList;
   }
@@ -89,10 +89,20 @@ class NotesProvider {
     log(i.toString());
   }
 
-
   Future<List<Notes>> getNotes() async {
     final db = await getInstance();
     final List<Map<String, dynamic>> maps = await db.query(tableNotes);
     return Notes.fromMaps(maps);
+  }
+  Future<List<Notes>> getDetail(int id) async {
+    final db = await getInstance();
+    final List<Map<String, dynamic>> maps = await db.query(tableNotes, where: "$columnId = $id");
+    return Notes.fromMaps(maps);
+  }
+
+  Future<int> update(Notes notes) async {
+    final db = await getInstance();
+    return await db.update(tableNotes, notes.toMap(),
+        where: "$columnId = ${notes.id}");
   }
 }
