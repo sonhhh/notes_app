@@ -1,27 +1,41 @@
+import 'package:app_note/sqlline/database_notes.dart';
 import 'package:flutter/material.dart';
 
 class SearchingNote extends StatefulWidget {
-  const SearchingNote({super.key});
-
+    String searchKey;
+    SearchingNote({Key? key, required this.searchKey}) : super(key: key);
   @override
   State<SearchingNote> createState() => _SearchingNoteState();
 }
 
 class _SearchingNoteState extends State<SearchingNote> {
+  NotesProvider notesProvider = NotesProvider();
   bool hasText = false;
   TextEditingController _controller = TextEditingController();
+  List<Map<String, dynamic>> searchRerults = [];
 
-  void _onTextChange(String valus) {
+
+  void search(String searchKey) async {
+    List<Notes> rerults = await notesProvider.getSearach(searchKey);
+    List<Map<String, dynamic>> maps =
+        rerults.map((note) => note.toMap()).toList();
     setState(() {
-      hasText = valus.isNotEmpty;
+      searchRerults = maps;
+      hasText = widget.searchKey.isNotEmpty;
     });
   }
 
+  // void _onTextChange(String valus) {
+  //   setState(() {
+  //     hasText = valus.isNotEmpty;
+  //   });
+  // }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _controller = TextEditingController();
+    search(widget.searchKey);
   }
 
   @override
@@ -30,7 +44,6 @@ class _SearchingNoteState extends State<SearchingNote> {
     super.dispose();
     _controller.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +60,12 @@ class _SearchingNoteState extends State<SearchingNote> {
               autofocus: true,
               style: const TextStyle(color: Colors.white),
               controller: _controller,
-              onChanged: _onTextChange,
+              onChanged: (searchKeyword){
+                setState(() {
+                  widget.searchKey = searchKeyword;
+                });
+                search(widget.searchKey);
+              },
               decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.1),
@@ -72,7 +90,21 @@ class _SearchingNoteState extends State<SearchingNote> {
                   focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30))),
             ),
-            const SizedBox(height: 120),
+            hasText ?
+            Container(
+              child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.vertical,
+                itemCount: searchRerults.length,
+                itemBuilder: (context, index) {
+                  final title = searchRerults[index]['title'];
+                  return ListTile(
+                    title: Text(title, style: TextStyle(color: Colors.white)),
+                  );
+                },
+              ),
+            ) :
+                SizedBox(height: 120,),
             Visibility(
                 visible: !hasText,
                 child: SizedBox(

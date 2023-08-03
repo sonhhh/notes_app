@@ -3,10 +3,12 @@ import 'package:app_note/ui/detail_note.dart';
 import 'package:app_note/ui/make_notes.dart';
 import 'package:app_note/ui/searching_note.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String? updateTitle ;
-   const HomeScreen({super.key, this.updateTitle});
+  final String? updateTitle;
+
+  const HomeScreen({super.key, this.updateTitle});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,9 +16,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   NotesProvider notesProvider = NotesProvider();
+  Notes notes = Notes();
   bool hasNote = false;
   late final List<Notes> noteList;
   late final int index;
+
   @override
   void initState() {
     super.initState();
@@ -30,11 +34,21 @@ class _HomeScreenState extends State<HomeScreen> {
       hasNote = noteList.isNotEmpty;
     });
   }
+
+  final _colors = [
+    Color.fromRGBO(253, 153, 255, 1),
+    Color.fromRGBO(255, 158, 158, 1),
+    Color.fromRGBO(145, 244, 143, 1),
+    Color.fromRGBO(255, 245, 153, 1),
+    Color.fromRGBO(158, 255, 255, 1),
+    Color.fromRGBO(182, 156, 255, 1)
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Container(
-        margin: const EdgeInsets.only(right: 40, bottom: 30),
+        margin: const EdgeInsets.only(right: 20, bottom: 30),
         decoration: BoxDecoration(
             color: const Color.fromRGBO(59, 59, 59, 1),
             borderRadius: BorderRadius.circular(30)),
@@ -75,7 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
-                            return const SearchingNote();
+                            return SearchingNote(
+                              searchKey: '',
+                            );
                           },
                         ));
                       },
@@ -97,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           builder: (context) {
                             return AlertDialog(
                               backgroundColor:
-                              const Color.fromRGBO(39, 39, 39, 1),
+                                  const Color.fromRGBO(39, 39, 39, 1),
                               content: const SingleChildScrollView(
                                 child: ListBody(
                                   children: <Widget>[
@@ -128,9 +144,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 TextButton(
                                   child: const Center(
                                       child: Text(
-                                        'Made by',
-                                        style: TextStyle(color: Colors.white),
-                                      )),
+                                    'Made by',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
@@ -151,56 +167,77 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               hasNote
                   ? Column(
-                children: [
-                  ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: noteList.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: const EdgeInsets.all(10),
-                        padding: const EdgeInsets.all(30),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all()),
-                        child: GestureDetector(
-                          onTap: () async {
-                            int selectedId = noteList[index].id ?? 0;
-                            print(selectedId);
-                            Navigator.push(
-                                context, MaterialPageRoute(builder: (context) {
-                              return DetailNote(
-                                noteId: selectedId
+                      children: [
+                        Slidable(
+                          startActionPane:
+                              ActionPane(
+                                  motion: BehindMotion(), children: [
+                            SlidableAction(
+                              onPressed: (BuildContext context) {},
+                              icon: Icons.delete,
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.red,
+                            )
+                          ]),
+                          child: ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: noteList.length,
+                            itemBuilder: (context, index) {
+                              return Card(
+                                color: _colors[index % _colors.length],
+                                child: Container(
+                                  margin: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(30),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      int selectedId = noteList[index].id ?? 0;
+                                      print(selectedId);
+                                      Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) {
+                                          return DetailNote(noteId: selectedId);
+                                        },
+                                      )).then((value) {
+                                        if (value != null) {
+                                          noteList[index].title =
+                                              value.toString();
+                                        }
+                                      });
+                                    },
+                                    child: Text(
+                                      widget.updateTitle ??
+                                          noteList[index].title ??
+                                          '',
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 25),
+                                    ),
+                                  ),
+                                ),
                               );
-                            },));
-                          },
-                          child: Text(
-                            widget.updateTitle ?? noteList[index].title ?? '',
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 25),
+                            },
                           ),
-                        ),
-                      );
-                    },
-                  )
-                ],
-              )
+                        )
+                      ],
+                    )
                   : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                      margin: const EdgeInsets.only(top: 80
-                      ),
-                      child: const Image(
-                        image: AssetImage('assets/image/rafiki.png'),
-                        fit: BoxFit.cover,
-                      )),
-                  const Text(
-                    'Create your first note !',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  )
-                ],
-              ),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                            margin: const EdgeInsets.only(top: 80),
+                            child: const Image(
+                              image: AssetImage('assets/image/rafiki.png'),
+                              fit: BoxFit.cover,
+                            )),
+                        const Text(
+                          'Create your first note !',
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        )
+                      ],
+                    ),
             ],
           ),
         ),

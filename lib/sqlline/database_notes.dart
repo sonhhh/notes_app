@@ -94,9 +94,11 @@ class NotesProvider {
     final List<Map<String, dynamic>> maps = await db.query(tableNotes);
     return Notes.fromMaps(maps);
   }
+
   Future<List<Notes>> getDetail(int id) async {
     final db = await getInstance();
-    final List<Map<String, dynamic>> maps = await db.query(tableNotes, where: "$columnId = $id");
+    final List<Map<String, dynamic>> maps =
+        await db.query(tableNotes, where: "$columnId = $id");
     return Notes.fromMaps(maps);
   }
 
@@ -104,5 +106,15 @@ class NotesProvider {
     final db = await getInstance();
     return await db.update(tableNotes, notes.toMap(),
         where: "$columnId = ${notes.id}");
+  }
+
+  Future<List<Notes>> getSearach(String searchKey) async {
+    final db = await getInstance();
+    final List<Map<String, dynamic>> maps = await db.query(
+      tableNotes,
+      where: ' $columnTitle LIKE ? AND $columnContent LIKE ?',
+      whereArgs: ['%$searchKey%', '%$searchKey%']
+    );
+    return Notes.fromMaps(maps);
   }
 }

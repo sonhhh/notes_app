@@ -15,6 +15,7 @@ class _DetailNoteState extends State<DetailNote> {
   late TextEditingController _controller;
   late TextEditingController _contentController;
   NotesProvider notesProvider = NotesProvider();
+  String? updateTitle;
 
   @override
   void initState() {
@@ -61,7 +62,7 @@ class _DetailNoteState extends State<DetailNote> {
                         borderRadius: BorderRadius.circular(15)),
                     child: IconButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pop(context, updateTitle);
                       },
                       icon: const Icon(
                         Icons.arrow_back_ios,
@@ -132,7 +133,7 @@ class _DetailNoteState extends State<DetailNote> {
                                             fixDate: DateTime.now(),
                                           );
                                           notesProvider.update(notes).then((value) {
-                                            final updateTitle = notes.title;
+                                            updateTitle = notes.title;
                                             Navigator.pop(context,
                                                 updateTitle);
                                           }
@@ -183,11 +184,6 @@ class _DetailNoteState extends State<DetailNote> {
                 autofocus: true,
                 maxLines: null,
                 style: const TextStyle(color: Colors.white, fontSize: 23),
-                onChanged: (value) {
-                  setState(() {
-                    // content =value;
-                  });
-                },
                 decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Type something...',
