@@ -1,5 +1,5 @@
 import 'dart:developer';
-
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import "package:path/path.dart";
 
@@ -52,8 +52,10 @@ class Notes {
   }
 }
 
-class NotesProvider {
+class NotesProvider with ChangeNotifier {
+  List<Notes>? noteList;
   static Database? _database;
+  bool hasNotes = false;
 
   static Future<Database> getInstance() async {
     if (_database != null) {
@@ -92,7 +94,9 @@ class NotesProvider {
   Future<List<Notes>> getNotes() async {
     final db = await getInstance();
     final List<Map<String, dynamic>> maps = await db.query(tableNotes);
-    return Notes.fromMaps(maps);
+    hasNotes = true;
+    notifyListeners();
+    return noteList = Notes.fromMaps(maps);
   }
 
   Future<List<Notes>> getDetail(int id) async {
@@ -108,13 +112,15 @@ class NotesProvider {
         where: "$columnId = ${notes.id}");
   }
 
-  Future<List<Notes>> getSearach(String searchKey) async {
+  Future<List<Notes>> getSearch(String searchKey) async {
     final db = await getInstance();
-    final List<Map<String, dynamic>> maps = await db.query(
-      tableNotes,
-      where: ' $columnTitle LIKE ? AND $columnContent LIKE ?',
-      whereArgs: ['%$searchKey%', '%$searchKey%']
-    );
+    final List<Map<String, dynamic>> maps = await db.query(tableNotes,
+        where: ' $columnTitle LIKE ?}', whereArgs: ['%$searchKey%']);
     return Notes.fromMaps(maps);
+  }
+
+  Future<int> delete(Notes notes) async {
+    final db = await getInstance();
+    return await db.delete(tableNotes, where: '$columnId =${notes.id}');
   }
 }

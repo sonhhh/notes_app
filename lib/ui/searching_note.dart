@@ -1,9 +1,13 @@
 import 'package:app_note/sqlline/database_notes.dart';
+import 'package:app_note/ui/detail_note.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SearchingNote extends StatefulWidget {
-    String searchKey;
-    SearchingNote({Key? key, required this.searchKey}) : super(key: key);
+  String searchKey;
+
+  SearchingNote({Key? key, required this.searchKey}) : super(key: key);
+
   @override
   State<SearchingNote> createState() => _SearchingNoteState();
 }
@@ -14,22 +18,18 @@ class _SearchingNoteState extends State<SearchingNote> {
   TextEditingController _controller = TextEditingController();
   List<Map<String, dynamic>> searchRerults = [];
 
-
   void search(String searchKey) async {
-    List<Notes> rerults = await notesProvider.getSearach(searchKey);
+    List<Notes> rerults = await notesProvider.getSearch(searchKey);
     List<Map<String, dynamic>> maps =
         rerults.map((note) => note.toMap()).toList();
     setState(() {
       searchRerults = maps;
       hasText = widget.searchKey.isNotEmpty;
     });
+    // final notesProvide = Provider.of<NotesProvider>(context , listen: false);
+    // await
   }
 
-  // void _onTextChange(String valus) {
-  //   setState(() {
-  //     hasText = valus.isNotEmpty;
-  //   });
-  // }
   @override
   void initState() {
     // TODO: implement initState
@@ -60,7 +60,7 @@ class _SearchingNoteState extends State<SearchingNote> {
               autofocus: true,
               style: const TextStyle(color: Colors.white),
               controller: _controller,
-              onChanged: (searchKeyword){
+              onChanged: (searchKeyword) {
                 setState(() {
                   widget.searchKey = searchKeyword;
                 });
@@ -90,21 +90,25 @@ class _SearchingNoteState extends State<SearchingNote> {
                   focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30))),
             ),
-            hasText ?
-            Container(
-              child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical,
-                itemCount: searchRerults.length,
-                itemBuilder: (context, index) {
-                  final title = searchRerults[index]['title'];
-                  return ListTile(
-                    title: Text(title, style: TextStyle(color: Colors.white)),
-                  );
-                },
-              ),
-            ) :
-                SizedBox(height: 120,),
+            hasText
+                ? ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  itemCount: searchRerults.length,
+                  itemBuilder: (context, index) {
+                    final title = searchRerults[index]['title'];
+                    //final id = searchRerults[index]['id'];
+                    return ListTile(
+                      title: GestureDetector(
+                        child: Text(title,
+                            style: const TextStyle(color: Colors.white)),
+                      ),
+                    );
+                  },
+                )
+                : const SizedBox(
+                    height: 120,
+                  ),
             Visibility(
                 visible: !hasText,
                 child: SizedBox(
@@ -116,15 +120,14 @@ class _SearchingNoteState extends State<SearchingNote> {
                         child: Image.asset('assets/image/cuate.png'),
                       )),
                       const Positioned(
-                        bottom: 0,
+                          bottom: 0,
                           child: Text(
-                        'File not found. Try searching again.',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-                      ))
+                            'File not found. Try searching again.',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ))
                     ],
                   ),
-                )
-                ),
+                )),
           ],
         ),
       ),
