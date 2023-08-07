@@ -16,9 +16,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
- // NotesProvider notesProvider = NotesProvider();
   Notes notes = Notes();
-//  bool hasNote = false;
 
  int? index;
 
@@ -30,11 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> initData() async {
-    // List<Notes> loadedNotes = await notesProvider.getNotes();
-    // setState(() {
-    //   noteList = loadedNotes;
-    //   hasNote = noteList!.isNotEmpty;
-    // });
     final notesProvider = Provider.of<NotesProvider>(context, listen: false);
     await notesProvider.getNotes();
   }
@@ -56,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       floatingActionButton: Container(
         margin: const EdgeInsets.only(right: 20, bottom: 30),
@@ -193,9 +187,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                children: [
                                  SlidableAction(
                                    onPressed: (context) {
-                                     // setState(() {
-                                     //   deleteOn(value.noteList![index]);
-                                     // });
                                      deleteOn(value.noteList![index]);
                                    },
                                    borderRadius: BorderRadius.circular(10),
@@ -223,13 +214,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                      },
                                    )).then((value) {
                                      if (value != null) {
-                                       value.noteList?[index].title =
-                                           value.toString();
+                                         value.noteList?[index].title = value.toString();
                                      }
                                    });
                                  },
                                  child: Text(
-                                   //widget.updateTitle ??
                                    value.noteList?[index].title ?? '',
                                    style: const TextStyle(
                                        color: Colors.white, fontSize: 25),

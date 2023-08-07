@@ -35,13 +35,10 @@ class _DetailNoteState extends State<DetailNote> {
   }
 
   Future<void> initData() async {
-   // List<Notes> loading = await NotesProvider().getDetail(widget.noteId);
     final notesProvider = Provider.of<NotesProvider>(context, listen: false);
     List<Notes> notesList = await notesProvider.getDetail(widget.noteId);
     _controller.text = notesList.isNotEmpty ? notesList[0].title ?? '' : '';
     _contentController.text = notesList.isNotEmpty ? notesList[0].content ?? '' : '';
-    // _controller.text = loading[0].title ?? '';
-    // _contentController.text = loading[0].content ?? '';
   }
 
   @override
@@ -177,7 +174,6 @@ class _DetailNoteState extends State<DetailNote> {
                   maxLines: null,
                   style: const TextStyle(color: Colors.white, fontSize: 48),
                   onChanged: (value) {
-                    setState(() {});
                   },
                   decoration: const InputDecoration(
                       border: InputBorder.none,

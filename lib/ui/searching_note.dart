@@ -3,6 +3,7 @@ import 'package:app_note/ui/detail_note.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class SearchingNote extends StatefulWidget {
   String searchKey;
 
@@ -13,29 +14,15 @@ class SearchingNote extends StatefulWidget {
 }
 
 class _SearchingNoteState extends State<SearchingNote> {
-  NotesProvider notesProvider = NotesProvider();
-  bool hasText = false;
   TextEditingController _controller = TextEditingController();
-  List<Notes> searchRerults = [];
-
-  void search(String searchKey) async {
-    List<Notes> rerults = await notesProvider.getSearch(searchKey);
-    List<Map<String, dynamic>> maps =
-        rerults.map((note) => note.toMap()).toList();
-    setState(() {
-      searchRerults = maps.cast<Notes>();
-      hasText = widget.searchKey.isNotEmpty;
-    });
-     final notesProvide = Provider.of<NotesProvider>(context , listen: false);
-     await notesProvide.getSearch(searchKey);
-  }
+  late NotesProvider notesProvide;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _controller = TextEditingController();
-    search(widget.searchKey);
+    notesProvide = Provider.of<NotesProvider>(context, listen: false);
   }
 
   @override
@@ -50,7 +37,9 @@ class _SearchingNoteState extends State<SearchingNote> {
     return Scaffold(
       body: Consumer<NotesProvider>(
         builder: (BuildContext context, value, Widget? child) {
+          final List<Notes>? note = value.searchRerults;
           return Container(
+            height: double.infinity,
             width: double.infinity,
             padding: const EdgeInsets.only(top: 70, right: 15, left: 15),
             decoration: const BoxDecoration(
@@ -64,10 +53,7 @@ class _SearchingNoteState extends State<SearchingNote> {
                     style: const TextStyle(color: Colors.white),
                     controller: _controller,
                     onChanged: (searchKeyword) {
-                      setState(() {
-                        widget.searchKey = searchKeyword;
-                      });
-                      search(widget.searchKey);
+                      notesProvide.getSearch(searchKeyword);
                     },
                     decoration: InputDecoration(
                         filled: true,
@@ -93,55 +79,57 @@ class _SearchingNoteState extends State<SearchingNote> {
                         focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30))),
                   ),
-                   hasText
-                      ? ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.vertical,
-                    itemCount: searchRerults.length,
-                    itemBuilder: (context, index) {
-                      final List<Notes> note = Notes.fromMaps(searchRerults.cast<Map<String, dynamic>>());
-                      final title = note[index]?.title ;
-                      final id = note[index].id ;
-                      return Container(
-                        height: MediaQuery.of(context).size.height,
-                        child: ListTile(
-                          title: GestureDetector(
-                            onTap: () {
-                              if(id != null){
-                                Navigator.push(context,MaterialPageRoute(builder: (context) {
-                                  return DetailNote(noteId: id);
-                                },) );
-                              }
-                            },
-                            child: Text( title!,
-                                style: const TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      );
-                    },
+                  value.hasText
+                      ?
+                      note != null && note.isNotEmpty ?
+                      ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          itemCount: value.searchRerults?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            final title = note[index].title;
+                            final id = note[index].id;
+                            return SizedBox(
+                              height: MediaQuery.of(context).size.height,
+                              child: ListTile(
+                                  title: GestureDetector(
+                                      onTap: () {
+                                        if (id != null) {
+                                          Navigator.push(context,
+                                              MaterialPageRoute(
+                                            builder: (context) {
+                                              return DetailNote(noteId: id);
+                                            },
+                                          ));
+                                        }
+                                      },
+                                      child: Text(title!,
+                                          style: const TextStyle(
+                                              color: Colors.white)))),
+                            );
+                          },
+                        )
+                      :
+                  SizedBox(
+                    height: 300,
+                    child: Stack(
+                      children: [
+                        Positioned(
+                            child: Center(
+                          child: Image.asset('assets/image/cuate.png'),
+                        )),
+                        const Positioned(
+                            bottom: 0,
+                            child: Text(
+                              'File not found. Try searching again.',
+                              style:
+                                  TextStyle(fontSize: 20, color: Colors.white),
+                            ))
+                      ],
+                    ),
                   )
-                      : const SizedBox(
-                    height: 120,
-                  ),
-                  Visibility(
-                      visible: !hasText,
-                      child: SizedBox(
-                        height: 300,
-                        child: Stack(
-                          children: [
-                            Positioned(
-                                child: Center(
-                                  child: Image.asset('assets/image/cuate.png'),
-                                )),
-                            const Positioned(
-                                bottom: 0,
-                                child: Text(
-                                  'File not found. Try searching again.',
-                                  style: TextStyle(fontSize: 20, color: Colors.white),
-                                ))
-                          ],
-                        ),
-                      )),
+                  :
+                  const SizedBox(),
                 ],
               ),
             ),

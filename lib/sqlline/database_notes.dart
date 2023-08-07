@@ -24,6 +24,7 @@ class Notes {
     this.dateCreate,
     this.fixDate,
   });
+
   static List<Notes> fromMaps(List<Map<String, dynamic>> maps) {
     List<Notes> notesList = [];
     for (var map in maps) {
@@ -36,6 +37,7 @@ class Notes {
     }
     return notesList;
   }
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       columnTitle: title,
@@ -48,7 +50,6 @@ class Notes {
     }
     return map;
   }
-
 }
 
 class NotesProvider with ChangeNotifier {
@@ -57,6 +58,7 @@ class NotesProvider with ChangeNotifier {
   static Database? _database;
   bool hasNotes = false;
   bool hasText = false;
+
   static Future<Database> getInstance() async {
     if (_database != null) {
       return _database!;
@@ -77,10 +79,8 @@ class NotesProvider with ChangeNotifier {
       },
       version: 1,
     );
-
-    String databasePath = _database?.path ?? " ";
-    print("Database path: $databasePath");
-
+   // String databasePath = _database?.path ?? " ";
+    //print("Database path: $databasePath");
     return _database!;
   }
 
@@ -112,24 +112,18 @@ class NotesProvider with ChangeNotifier {
     notifyListeners();
     return await db.update(tableNotes, notes.toMap(),
         where: "$columnId = ${notes.id}");
-
-
   }
 
-  // Future<List<Notes>> getSearch(String searchKey) async {
-  //   final db = await getInstance();
-  //   final List<Map<String, dynamic>> maps = await db.query(tableNotes,
-  //       where: ' $columnTitle LIKE ?}', whereArgs: ['%$searchKey%']);
-  //   return Notes.fromMaps(maps);
-  // }
   Future<List<Notes>> getSearch(String searchKey) async {
     final db = await getInstance();
-    hasText = true;
-    final List<Map<String, dynamic>> maps = await db.query(tableNotes, where: '$columnTitle LIKE ?', whereArgs: ['%$searchKey%']);
+    final List<Map<String, dynamic>> maps = await db.query(tableNotes,
+        where: '$columnTitle LIKE ?', whereArgs: ['%$searchKey%']);
+    searchRerults = (searchRerults ?? Notes.fromMaps([]));
+    searchRerults = Notes.fromMaps(maps);
+    hasText = searchRerults!.isNotEmpty;
     notifyListeners();
-    return searchRerults= Notes.fromMaps(maps);
+    return Notes.fromMaps(maps);
   }
-
   Future<int> delete(Notes notes) async {
     final db = await getInstance();
     notifyListeners();

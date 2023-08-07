@@ -1,5 +1,6 @@
 import 'package:app_note/sqlline/database_notes.dart';
 import 'package:app_note/ui/home_screen.dart';
+//import 'package:app_note/ui/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class MakeNotes extends StatefulWidget {
