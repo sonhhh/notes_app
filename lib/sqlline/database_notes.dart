@@ -24,7 +24,18 @@ class Notes {
     this.dateCreate,
     this.fixDate,
   });
-
+  static List<Notes> fromMaps(List<Map<String, dynamic>> maps) {
+    List<Notes> notesList = [];
+    for (var map in maps) {
+      notesList.add(Notes(
+          id: map[columnId],
+          title: map[columnTitle],
+          content: map[columnContent],
+          dateCreate: null,
+          fixDate: null));
+    }
+    return notesList;
+  }
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       columnTitle: title,
@@ -38,25 +49,14 @@ class Notes {
     return map;
   }
 
-  static List<Notes> fromMaps(List<Map<String, dynamic>> maps) {
-    List<Notes> notesList = [];
-    for (var map in maps) {
-      notesList.add(Notes(
-          id: map[columnId],
-          title: map[columnTitle],
-          content: map[columnContent],
-          dateCreate: null,
-          fixDate: null));
-    }
-    return notesList;
-  }
 }
 
 class NotesProvider with ChangeNotifier {
   List<Notes>? noteList;
+  List<Notes>? searchRerults;
   static Database? _database;
   bool hasNotes = false;
-
+  bool hasText = false;
   static Future<Database> getInstance() async {
     if (_database != null) {
       return _database!;
@@ -103,24 +103,36 @@ class NotesProvider with ChangeNotifier {
     final db = await getInstance();
     final List<Map<String, dynamic>> maps =
         await db.query(tableNotes, where: "$columnId = $id");
+    notifyListeners();
     return Notes.fromMaps(maps);
   }
 
   Future<int> update(Notes notes) async {
     final db = await getInstance();
+    notifyListeners();
     return await db.update(tableNotes, notes.toMap(),
         where: "$columnId = ${notes.id}");
+
+
   }
 
+  // Future<List<Notes>> getSearch(String searchKey) async {
+  //   final db = await getInstance();
+  //   final List<Map<String, dynamic>> maps = await db.query(tableNotes,
+  //       where: ' $columnTitle LIKE ?}', whereArgs: ['%$searchKey%']);
+  //   return Notes.fromMaps(maps);
+  // }
   Future<List<Notes>> getSearch(String searchKey) async {
     final db = await getInstance();
-    final List<Map<String, dynamic>> maps = await db.query(tableNotes,
-        where: ' $columnTitle LIKE ?}', whereArgs: ['%$searchKey%']);
-    return Notes.fromMaps(maps);
+    hasText = true;
+    final List<Map<String, dynamic>> maps = await db.query(tableNotes, where: '$columnTitle LIKE ?', whereArgs: ['%$searchKey%']);
+    notifyListeners();
+    return searchRerults= Notes.fromMaps(maps);
   }
 
   Future<int> delete(Notes notes) async {
     final db = await getInstance();
+    notifyListeners();
     return await db.delete(tableNotes, where: '$columnId =${notes.id}');
   }
 }

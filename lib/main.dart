@@ -9,7 +9,7 @@ void main() {
       MultiProvider(providers: [
         ChangeNotifierProvider(create: (context) => NotesProvider()),
       ],
-        child: MyApp(),
+        child: const MyApp(),
       )
       //const MyApp()
   );
